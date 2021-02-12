@@ -36,7 +36,7 @@ class Node():
         if(self.has_edge_to(node)):
             return self.edges[node.id]
         else:
-            return math.sqrt((self.x_grid-node.x_grid*10)**2 + (self.y_grid-node.y_grid)**2*10)
+            return math.sqrt(((self.x_grid-node.x_grid)*1000)**2 + (((self.y_grid-node.y_grid)*1000)**2))
 
 def square_to_coord(square_id):
     x = square_id % 10
@@ -172,7 +172,7 @@ for id in nodes:
 print("\nSource:",source)
 print("Destination:",dest)
 
-source = 2
+source = 0
 dest = 99
 
 
@@ -197,7 +197,7 @@ print("path:",path)
 print("duration",end_time-start_time)
     
 
-
+#astar
 
 start_time = time.time_ns()
 dist,prev = astar(source, dest, nodes)
@@ -218,4 +218,43 @@ print("path:",path)
 print("duration",end_time-start_time)
 
 
-    
+
+djikstra_total = 0
+astar_total = 0
+count = 0
+for source in range(0,100):
+    for dest in range(0,100):
+
+        count += 1
+        print(count,source,dest)
+        #djikstras
+        start_time = time.time()
+        dist,prev = djikstra(source, dest, nodes)
+        end_time = time.time()
+        
+        djikstra_total += end_time-start_time           
+        
+        #astar
+        
+        start_time = time.time()
+        dist,prev = astar(source, dest, nodes)
+        end_time = time.time()
+        
+
+        astar_total += end_time-start_time 
+        
+djisktra_average = djikstra_total/(count*1000) 
+astar_average = astar_total/(count*1000)          
+print("\nDjikstra")
+print("Total Time(ms)  :",djikstra_total)
+print("Average Time(ms):",djisktra_average)
+
+print("\nA*")
+print("Total Time(ms)  :",astar_total/1000)
+print("Average Time(ms):",astar_average)
+
+print()
+print("a* speed increase:",djisktra_average/astar_average)
+        
+
+        
