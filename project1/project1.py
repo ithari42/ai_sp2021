@@ -6,7 +6,6 @@ Created on Thu Feb 11 00:42:53 2021
 """
 
 import math
-
 import time
 
 
@@ -96,7 +95,9 @@ def djikstra(start_id,end_id,nodes, complete=True):
         unsearched.append(node)
     dist[start_id] = 0
     
-    while(len(unsearched) > 0):
+    unfinished = True
+    
+    while(len(unsearched) > 0) and unfinished:
         shortest_id = -1
         shortest_distance = -1
         for node_id in unsearched:
@@ -113,14 +114,18 @@ def djikstra(start_id,end_id,nodes, complete=True):
         for node_id in nodes[shortest_id].edges:
             if node_id in unsearched:
                 alt_dist = dist[shortest_id] + nodes[shortest_id].edges[node_id]
+                if node_id == dest and not complete: # not working currently
+                    unfinished = False 
+                 
                 if alt_dist < dist[node_id] or dist[node_id] == -1:
                     dist[node_id] = alt_dist
                     prev[node_id] = shortest_id
+                
                     
     return dist,prev
 
 
-def astar(source,dest,nodes):
+def astar(source,dest,nodes,weight=1):
     dist = dict()
     prev = dict()
     unsearched = []
@@ -138,10 +143,10 @@ def astar(source,dest,nodes):
         shortest_distance = -1
         for node_id in unsearched:
             if shortest_distance == -1 and dist[node_id] != -1:
-                shortest_distance == dist[node_id]+nodes[node_id].distance_to(nodes[dest])
+                shortest_distance == dist[node_id] + nodes[node_id].distance_to(nodes[dest])*weight
                 shortest_id = node_id
             elif shortest_distance != -1 and dist[node_id] != -1:
-                if dist[node_id]+nodes[node_id].distance_to(nodes[dest]) < shortest_distance:
+                if dist[node_id] + nodes[node_id].distance_to(nodes[dest])*weight < shortest_distance:
                     shortest_distance == dist[node_id]
                     shortest_id = node_id
         
@@ -149,11 +154,11 @@ def astar(source,dest,nodes):
         
         for node_id in nodes[shortest_id].edges:
             if node_id == dest:
-                alt_dist = dist[shortest_id] + nodes[shortest_id].edges[node_id]
-                dist[node_id] = alt_dist
-                prev[node_id] = shortest_id
+                # alt_dist = dist[shortest_id] + nodes[shortest_id].edges[node_id]
+                # dist[node_id] = alt_dist
+                # prev[node_id] = shortest_id
                 unfinished = False
-                break
+                # break
             
             if node_id in unsearched:
                 alt_dist = dist[shortest_id] + nodes[shortest_id].edges[node_id]
@@ -176,63 +181,53 @@ source = 0
 dest = 99
 
 
-#djikstras
-
-start_time = time.time_ns()
-dist,prev = djikstra(source, dest, nodes)
-end_time = time.time_ns()
-
-path = []
-length = dist[dest]
-current = dest
-
-while(current != source):
-    path.insert(0,current)
-    current = prev[current]
-path.insert(0,current)
-
-print("\ndjikstra's")
-print("distance:",length)
-print("path:",path)
-print("duration",end_time-start_time)
-    
-
-#astar
-
-start_time = time.time_ns()
-dist,prev = astar(source, dest, nodes)
-end_time = time.time_ns()
-
-path = []
-length = dist[dest]
-current = dest
-
-while(current != source):
-    path.insert(0,current)
-    current = prev[current]
-path.insert(0,current)
-
-print("\nA*")
-print("distance:",length)
-print("path:",path)
-print("duration",end_time-start_time)
 
 
 
-djikstra_total = 0
+djikstra_c_total = 0
+djikstra_i_total = 0
 astar_total = 0
+
+djikstra_c_min = -1
+djikstra_i_min = -1
+astar_min = -1
+
+djikstra_c_max = 0
+djikstra_i_max = 0
+astar_max = 0
+
 count = 0
 for source in range(0,100):
-    for dest in range(0,100):
+    for dest in range(source+1,100):
 
         count += 1
-        print(count,source,dest)
-        #djikstras
+        print("Processing:",count,source,dest)
+        
+        #djikstras complete
         start_time = time.time()
         dist,prev = djikstra(source, dest, nodes)
         end_time = time.time()
         
-        djikstra_total += end_time-start_time           
+        djikstra_c_total += end_time-start_time    
+        
+        if djikstra_c_min == -1 or (end_time-start_time) < djikstra_c_min:
+            djikstra_c_min = end_time-start_time
+        if djikstra_c_max < (end_time-start_time):
+            djikstra_c_max = end_time-start_time
+        
+        
+        #djisktras incomplete
+        start_time = time.time()
+        dist,prev = djikstra(source, dest, nodes,complete=False)
+        end_time = time.time()
+        
+        djikstra_i_total += end_time-start_time  
+        
+        if djikstra_i_min == -1 or (end_time-start_time) < djikstra_i_min:
+            djikstra_i_min = end_time-start_time
+        if djikstra_i_max < (end_time-start_time):
+            djikstra_i_max = end_time-start_time
+        
         
         #astar
         
@@ -243,18 +238,99 @@ for source in range(0,100):
 
         astar_total += end_time-start_time 
         
-djisktra_average = djikstra_total/(count*1000) 
-astar_average = astar_total/(count*1000)          
-print("\nDjikstra")
-print("Total Time(ms)  :",djikstra_total)
-print("Average Time(ms):",djisktra_average)
+        if astar_min == -1 or (end_time-start_time) < astar_min:
+            astar_min = end_time-start_time
+        if astar_max < (end_time-start_time):
+            astar_max = end_time-start_time
+        
+djisktra_c_average = djikstra_c_total*1000/(count) 
+djisktra_i_average = djikstra_i_total*1000/(count) 
+astar_average = astar_total*1000/(count)          
+print("\nDjikstra complete")
+print("Total Time(ms)  :",djikstra_c_total)
+print("Average Time(us):",djisktra_c_average)
+print("Min:",djikstra_c_min*1000)
+print("Max:",djikstra_c_max*1000)
+
+print("\nDjikstra incomplete")
+print("Total Time(ms)  :",djikstra_i_total)
+print("Average Time(us):",djisktra_i_average)
+print("Min:",djikstra_i_min*1000)
+print("Max:",djikstra_i_max*1000)
 
 print("\nA*")
-print("Total Time(ms)  :",astar_total/1000)
-print("Average Time(ms):",astar_average)
+print("Total Time(ms)  :",astar_total)
+print("Average Time(us):",astar_average)
+print("Min:",astar_min*1000)
+print("Max:",astar_max*1000)
 
 print()
-print("a* speed increase:",djisktra_average/astar_average)
+print("A* vs djikstra complete  :",djisktra_c_average/astar_average)
+print("djikstra incomplete vs A*:",astar_average/djisktra_i_average)
         
 
+# source = 2
+# dest = 99
+
+
+# #djikstras complete
+
+# start_time = time.time_ns()
+# dist,prev = djikstra(source, dest, nodes)
+# end_time = time.time_ns()
+
+# path = []
+# length = dist[dest]
+# current = dest
+
+# while(current != source):
+#     path.insert(0,current)
+#     current = prev[current]
+# path.insert(0,current)
+
+# print("\ndjikstra's complete")
+# print("distance:",length)
+# print("path:",path)
+# print("duration",end_time-start_time)
+
+# #djikstras incomplete
+
+# start_time = time.time_ns()
+# dist,prev = djikstra(source, dest, nodes)
+# end_time = time.time_ns()
+
+# path = []
+# length = dist[dest]
+# current = dest
+
+# while(current != source):
+#     path.insert(0,current)
+#     current = prev[current]
+# path.insert(0,current)
+
+# print("\ndjikstra's incomplete")
+# print("distance:",length)
+# print("path:",path)
+# print("duration",end_time-start_time)
+    
+
+# #astar
+
+# start_time = time.time_ns()
+# dist,prev = astar(source, dest, nodes)
+# end_time = time.time_ns()
+
+# path = []
+# length = dist[dest]
+# current = dest
+
+# while(current != source):
+#     path.insert(0,current)
+#     current = prev[current]
+# path.insert(0,current)
+
+# print("\nA*")
+# print("distance:",length)
+# print("path:",path)
+# print("duration",end_time-start_time)
         
