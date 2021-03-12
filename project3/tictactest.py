@@ -9,32 +9,55 @@ import numpy as np
 
 
 
+
+class CRD():
+    
+    def __init__(self):
+        self.cols = dict()
+        self.rows = dict()
+        self.left_diag = 0
+        self.right_diag = 0
+        
+        
+
 class Grid():
     def __init__(self,x_offset,y_offset,length):
         self.x_offset = -x_offset
         self.y_offset = -y_offset
         self.length = length
         self.grid = np.zeros((length,length))
+        self.crd = CRD()
         
     def apply_move(self,x,y,piece):
         x_coord = x - self.x_offset
         y_coord = y - self.y_offset
-        if  x_coord < self.length and y_coord < self.length:
+        if x_coord < self.length and y_coord < self.length:
             self.grid[y_coord,x_coord] = piece
+            self.update_CRD()
             
-    def check_win():
-        piece_wins = dict()
-        piece_wins[1] = 0
-        piece_wins[-1] = 0
-        for col in range(length):
-            total = np.sum(self.grid,0)[col]
-            if total == length:
-                piece_wins[1] += 1
-            elif total == -length:
-                piece_wins[-1] += 1
+            
+            
+    def update_CRD():
+      
+        #check rows/columns
+        for i in range(length):
+            col_total = np.sum(self.grid,0)[i]
+            row_total = np.sum(self.grid,1)[i]
+            
+            self.crd.rows[i] = col_total
+            self.crd.cols[i] = row_total
         
+        #check diagonals
+        left_total = 0
+        right_total = 0
+        for i in range(length):
+            left_total += self.grid[i,i]
+            right_total += self.grid[i,length-i]
             
-
+        self.crd.left_diag = left_total
+        self.crd.right_diag = right_total
+        
+        return piece_wins
 
 
 class Game():
