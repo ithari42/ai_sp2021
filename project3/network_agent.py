@@ -18,6 +18,7 @@ import mimetypes
 from codecs import encode
 import json
 
+
 class Network_Agent():
     def __init__(self,api_key,user_id):
         self.api_key = api_key
@@ -44,6 +45,12 @@ class Network_Agent():
 
     
     def create_game(self,team_id1,team_id2,board_size='20',target='10'):
+        
+        team_id1 = str(team_id1)
+        team_id2 = str(team_id2)
+        board_size = str(board_size)
+        target = str(target
+                     )
         conn = http.client.HTTPSConnection(URL1)
         dataList = []
         boundary = 'wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T'
@@ -114,6 +121,11 @@ class Network_Agent():
         return game_id
         
     def make_move(self,team_id,game_id,x,y):
+        team_id = str(team_id)
+        game_id = str(game_id)
+        x = str(x)
+        y = str(y)
+        
         conn = http.client.HTTPSConnection(URL1)
         dataList = []
         boundary = 'wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T'
@@ -160,12 +172,20 @@ class Network_Agent():
         data=json.loads(res.read().decode('utf-8'))
         print(data)
         
+        
+        
         if "moveId" in data:
             return data['moveId']
         else:
             return ""
         
     def get_moves(self,game_id,turn_count):
+        
+        game_id = str(game_id)
+        turn_count = str(turn_count)
+        
+        
+        
         conn = http.client.HTTPSConnection(URL1)
         boundary = ''
         payload = ''
@@ -191,7 +211,8 @@ class Network_Agent():
     
 # agent = Network_Agent(API_KEY,USER_ID)
 # agent.get_my_games("1282")
-# moves = agent.get_moves("2325",10)
+# print()
+# moves = agent.get_moves("2325",1)
 # print(moves[0]['moveId'])
 
 # move_id = agent.make_move("1283","2325",2,1)

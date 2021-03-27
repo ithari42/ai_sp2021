@@ -14,7 +14,8 @@ from game import Game
 
 class Player():
     
-    def __init__(self,piece,mode="simple"):
+    def __init__(self,team_id,piece,mode="simple"):
+        self.team_id = team_id
         self.piece = piece
         self.mode = mode
         

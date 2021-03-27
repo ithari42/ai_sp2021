@@ -11,9 +11,11 @@ from crd import CRD
 from grid import Grid
 
 class Game():
-    def __init__(self,boardsize,target):
+    def __init__(self,game_id,boardsize,target):
+        self.game_id = game_id
         self.boardsize = boardsize
         self.target = target
+        self.last_move = ""
         self.full_grid = Grid(0,0,boardsize,True)
         self.grids = []
         self.turncount = 0
@@ -30,7 +32,7 @@ class Game():
         for i in range(m-n+1):
             for j in range(m-n+1):
                 self.grids.append(Grid(j,i,n))
-                print(j,i)
+                #print(j,i)
                 
     def update_space_values(self):
         self.space_values = dict()
